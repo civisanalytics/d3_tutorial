@@ -3,8 +3,15 @@
 <style>
   @import url('https://fonts.googleapis.com/css?family=Baloo+Thambi');
 
+   * {
+     margin:0;
+     padding:0;
+     font-family: Baloo Thambi;
+   }
+
    h1 {
      font-size:16px sans-serif;
+     margin-left: 10px;
      line-height:0.2em;
      font-weight: bold;
      font-family: Baloo Thambi;
@@ -12,6 +19,7 @@
 
    h2 {
      font: 15px sans-serif;
+     margin-left: 10px;
      line-height:0.2em;
      font-weight: bold;
      font-family: Baloo Thambi;
@@ -26,6 +34,12 @@
    .axis text {
      fill: #8FA2AC;
      font: 12px sans-serif;
+     font-family: Baloo Thambi;
+   }
+   
+   .axis_title {
+     fill: #8FA2AC;
+     text-anchor: middle;
      font-family: Baloo Thambi;
    }
 
@@ -59,27 +73,23 @@
    .circle_legend {
      fill: none;
    }
-
+   
+   .circle_text {
+     fill: #8FA2AC;
+     font-family: Baloo Thambi;                   
+   }
+   
    text {
      font-family: Baloo Thambi;
    }
 
    label {
      font-family: Baloo Thambi;
-   }
-
-   .trend_label {
-     font-family: Baloo Thambi;
+     margin-left: 10px;
    }
 
    .show_label {
      font-family: Baloo Thambi;
-   }
-
-   .legend_50_label {
-     fill: #8FA2AC;
-     text-anchor: middle;
-     font-family: Baloo Thambi;                   
    }
 
    .legend_label {
@@ -93,15 +103,15 @@
 
 <body>
    <div id='title' style='width:1366px;'>
-      <h1>TV dramas shown in America</h1>
-      <h2>Average IMDb user ratings, by show and season*</h2>
+      <h1>Movie Franchises</h1>
+      <h2>Worldwide box office gross and Rotten Tomatoes score by Movie Franchise*</h2>
       <br></br>
    </div>
    <div id='vis' style='width:1366px;'>
        <svg class='chart-outer'><g class='chart'></g></svg>
    </div>
    <div id='caption' style='width:1366px;'>
-      <p style='text-align:right'>*Seasons with at least 100 ratings on average</p>
+      <p style='text-align:right'>*franchises with four or more movies</p>
    </div>
 
 <script>
@@ -109,13 +119,14 @@
   var data = JSON.parse(document.getElementById('data').innerHTML);
   var vis_width = 1366;
   var vis_height = 650;
-  var params = {};
-
+  var params = {franchiseaxis: 'All', min_date: 1930, max_date: 2020};
+  
   draw = function(data, vis_width, vis_height, params) {
 
-      var margin = {top: 30, right: 30, bottom: 30, left: 30};
+      var margin = {top: 30, right: 50, bottom: 30, left: 50};
       var width = vis_width - margin.left - margin.right,
           height = vis_height - margin.top - margin.bottom;
+      
       d3.select('.chart-outer')
           .attr('width', vis_width)
           .attr('height', vis_height);
@@ -128,22 +139,22 @@
 
       var xScale = d3.scaleTime()
               .range([0, width])
-              .domain([_.min(data.map(function(d) { return new Date(d['date']);})),
-                       _.max(data.map(function(d) { return new Date(d['date']);}))])
+              .domain([new Date(params['min_date'] + '-01-01'),
+                       new Date(params['max_date'] + '-01-01')])
 
       var yScale = d3.scaleLinear()
         .range([height, 0])
-        .domain([5.5,
-                 10]);
+        .domain([0,
+                 100]);
 
       var bubbleScale = d3.scaleLinear()
-          .range([10,1000])
-          .domain([_.min(data.map(function(d) { return d['share'];})),
-                   _.max(data.map(function(d) { return d['share'];}))]);
+          .range([10,500])
+          .domain([_.min(data.map(function(d) { return d['gross'];})),
+                   _.max(data.map(function(d) { return d['gross'];}))]);
 
       var line = d3.line()
           .x(function(d) { return xScale(new Date(d['date'])); }) // set the x values for the line generator
-          .y(function(d) { return yScale(d['av_rating']); }) // set the y values for the line generator 
+          .y(function(d) { return yScale(d['rating']); }) // set the y values for the line generator 
           .curve(d3.curveMonotoneX) // apply smoothing to the line
 
       var yAxis = d3.axisRight(yScale)
@@ -153,31 +164,40 @@
           .attr('class', 'y axis')
           .attr('transform', 'translate(' + width + ',' + 0 + ')')
           .call(yAxis);
+          
+      svg.append("text")
+            .attr("class", "axis_title")
+            .attr("text-anchor", "middle")
+            .attr("transform", "translate("+ (width + 40) + "," + (height/2) + ") rotate(-90)")
+            .text("Rotten Tomatoes Score");
 
-      var date_labels = [{date: '1990'},
-                         {date: '1995'},
+      var date_labels = [{date: '1930'},
+                         {date: '1940'},
+                         {date: '1950'},
+                         {date: '1960'},
+                         {date: '1970'},
+                         {date: '1980'},
+                         {date: '1990'},
                          {date: '2000'},
-                         {date: '2005'},
                          {date: '2010'},
-                         {date: '2015'},
                          {date: '2018'}];
 
       svg.selectAll('.date_marker')
           .data(date_labels)
         .enter().append('line')
-          .attr('class', '.date_marker')
-          .attr('y1', yScale(5.5))
+          .attr('class', 'date_marker')
+          .attr('y1', yScale(0))
           .attr('x1', function(d) {return xScale(new Date(d['date'] + '-01-01'));})
           .attr('x2', function(d) {return xScale(new Date(d['date'] + '-01-01'));})
-          .attr('y2', yScale(10))
+          .attr('y2', yScale(100))
           .style('stroke', '#E3E9ED')
-
+          
       svg.selectAll('.date_label_top')
           .data(date_labels)
         .enter().append('text')
           .attr('class', 'date_label_top')
           .attr('x', function(d) {return xScale(new Date(d['date'] + '-01-01'));})
-          .attr('y', yScale(10) - 10)
+          .attr('y', yScale(100) - 10)
           .text(function(d) {return d['date']})
 
       svg.selectAll('.date_label_bottom')
@@ -185,69 +205,51 @@
         .enter().append('text')
           .attr('class', 'date_label_bottom')
           .attr('x', function(d) {return xScale(new Date(d['date'] + '-01-01'));})
-          .attr('y', yScale(5.5) + 20)
+          .attr('y', yScale(0) + 20)
           .text(function(d) {return d['date']})
 
-      svg.append('line')
-          .attr('class', 'line trend')
-          .attr('x1', xScale(new Date('1990-01-03')))
-          .attr('y1', yScale(7.83048096429813))
-          .attr('x2', xScale(new Date('2018-10-10')))
-          .attr('y2', yScale(8.14802906821573))
-          .style('stroke', '#256CA2')
-          .style('stroke-width', 4)
-          .style('stroke-dasharray', ('10, 10'))
-
-      var titles = d3.set(data.map(function(d) { return d['title'];})).values();
+      var franchises = d3.set(data.map(function(d) { return d['franchise'];})).values();
       var i;
-      for (i = 0; i < titles.length; i++) { 
+      for (i = 0; i < franchises.length; i++) { 
 
-          var title_filt = titles[i];
+          var franchise_filt = franchises[i];
           var data_filt = _.filter(data,function(element){
-              return element.title && [element.title].indexOf(title_filt) != -1;})
+              return element.franchise && [element.franchise].indexOf(franchise_filt) != -1;})
 
           svg.append('path')
               .datum(data_filt)  
               .attr('class', function(d) {return d[0]['highlight'] == 1 ? 'curve line_' + i + ' line_highlight': 'curve line_' + i;}) 
               .attr('d', line)
               .style('fill', 'none')
-              .style('stroke','#55BCD2')
+              .style('stroke','#005b96')
               .style('stroke-width', 4)
-              .style('opacity', function(d) {return d[0]['highlight'] == 1 ? 1 : 0;})
+              .style('opacity', function(d) {return d[0]['highlight'] == 1 ? 0.7 : 0;})
       };
               
-      for (i = 0; i < titles.length; i++) {
+      for (i = 0; i < franchises.length; i++) {
 
-          var title_filt = titles[i];
+          var franchise_filt = franchises[i];
           var data_filt = _.filter(data,function(element){
-              return element.title && [element.title].indexOf(title_filt) != -1;})
+              return element.franchise && [element.franchise].indexOf(franchise_filt) != -1;})
 
           svg.selectAll('.circle_' + i)
             .data(data_filt)
           .enter().append('circle')
             .attr('class', function(d) {return d['highlight'] == 1 ? 'dot circle_' + i + ' circle_highlight' : 'dot circle_' + i;})
             .attr('cx', function(d) { return xScale(new Date(d['date']));})
-            .attr('cy', function(d) { return yScale(parseFloat(d['av_rating']));})
-            .attr('r', function(d) { return Math.sqrt((bubbleScale(parseFloat(d['share'])))/Math.PI);})
-            .style('fill', function(d) {return d['highlight'] == 1 ? '#55BCD2' : '#BFE1EA';}) // #55BCD2 for highlighted, #BFE1EA for non-highlighted
+            .attr('cy', function(d) { return yScale(parseFloat(d['rating']));})
+            .attr('r', function(d) { return Math.sqrt((bubbleScale(parseFloat(d['gross'])))/Math.PI);})
+            .style('fill', function(d) {return d['highlight'] == 1 ? '#005b96' : '#b3cde0';}) // #005b96 for highlighted, #b3cde0 for non-highlighted
             .style('stroke-width', 0)
             .style('stroke', 'black')
+            .style('opacity', 0.7)
+
       };
 
-      svg.append('text')
-          .attr('class', 'trend_label')
-          .attr('x', xScale(new Date('2011-01-01')))
-          .attr('y', yScale(7.9))
-          .style('font-size','20px')
-          .text('TV Drama Trend')
-
-      var show_labels = [{title: 'Law & Order', date: '2005-01-01', rating: 7.6},
-                         {title: 'Breaking Bad', date: '2010-01-01', rating: 9},
-                         {title: 'Game of Thrones', date: '2016-01-01', rating: 9.6},
-                         {title: 'Lost', date: '2006-06-01', rating: 8.8},
-                         {title: 'The Wire', date: '2005-01-01', rating: 8.5},
-                         {title: 'Riverdale', date: '2018-01-01', rating: 8.25},
-                         {title: 'The Walking Dead', date: '2014', rating: 8.35}];
+      var show_labels = [{franchise: 'King Kong', date: '1955-01-01', rating: 50},
+                         {franchise: 'Terminator', date: '1993-01-01', rating: 85},
+                         {franchise: 'TMNT', date: '2004-01-01', rating: 28},
+                         {franchise: 'Mission: Impossible', date: '2013-01-01', rating: 97}];
 
       svg.selectAll('.show_label')
           .data(show_labels)
@@ -255,51 +257,51 @@
           .attr('class', 'show_label')
           .attr('x', function(d) {return xScale(new Date(d['date']));})
           .attr('y', function(d) {return yScale(d['rating']);})
-          .style('fill', '#55BCD2')
+          .style('fill', '#005b96')
           .style('font-size','14px')
           .style('text-anchor','middle')
           .style('opacity', 1)
-          .text(function(d) {return d['title']})
+          .text(function(d) {return d['franchise']})
 
-      var data_legend = [{area: 10},
-                         {area: 30},
-                         {area: 50}];
+      var data_legend = [{area: 2000000000, text: '$2B'},
+                         {area: 1000000000, text: '$1B'},
+                         {area:  500000000, text: '$500M'}];
 
       svg.selectAll('.circle_label')
           .data(data_legend)
         .enter().append('circle')
           .attr('class', 'circle_legend')
-          .attr('cx', function(d) {return xScale(new Date('2002-06-01'));})
-          .attr('cy', function(d) {return yScale(9.5) - Math.sqrt((bubbleScale(d['area']))/Math.PI);})
+          .attr('cx', function(d) {return xScale(new Date(params['min_date'] + '-06-01')) + 50;})
+          .attr('cy', function(d, i) {return yScale(10) - 30*i;})
           .attr('r', function(d) {return Math.sqrt((bubbleScale(d['area']))/Math.PI)})
           .style('stroke-size', 2)
           .style('stroke','#8FA2AC')
 
-      svg.append('text')
-          .attr('class', 'legend_50_label')
-          .attr('x', function(d) {return xScale(new Date('2002-06-01'));})
-          .attr('y', function(d) {return yScale(9.5) - 2*Math.sqrt((bubbleScale(50))/Math.PI);})
+      svg.selectAll('.circle_text')
+          .data(data_legend)
+        .enter().append('text')
+          .attr('class', 'circle_text')
+          .attr('x', function(d) {return xScale(new Date(params['min_date'] + '-06-01')) + 70;})
+          .attr('y', function(d,i) {return yScale(10) - 30*i + 4;})
           .style('font-size','12px')
-          .style('text-anchor','middle')
-          .text('50%')
+          .text(function(d) {return d['text'];})
 
-      legend_label_data = [{text: 'Size = share of IMDb'},
-                           {text: 'ratings for shows'},
-                           {text: 'in that year'}]
+      legend_label_data = [{text: 'Area = Box Office'},
+                           {text: '(worldwide)'}]
 
       svg.selectAll('.legend_label')
           .data(legend_label_data)
         .enter().append('text')
           .attr('class', 'legend_label')
-          .attr('x', function(d) { return xScale(new Date('2002-06-01'));})
-          .attr('y', function(d,i) { return yScale(9.5) + Math.sqrt((bubbleScale(50))/Math.PI) + i*12;})
+          .attr('x', function(d) { return xScale(new Date(params['min_date'] + '-06-01')) + 50;})
+          .attr('y', function(d,i) { return yScale(5) + Math.sqrt((bubbleScale(50))/Math.PI) + i*12;})
           .style('font-size','12px')
           .style('text-anchor','middle')
           .text(function(d) { return d['text']})
   }
-
+  
   draw(data,vis_width,vis_height,params);
-
+  
 </script>
 </body>
 </html>

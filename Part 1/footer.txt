@@ -3,8 +3,15 @@
 <style>
   @import url('https://fonts.googleapis.com/css?family=Baloo+Thambi');
 
+   * {
+     margin:0;
+     padding:0;
+     font-family: Baloo Thambi;
+   }
+
    h1 {
      font-size:16px sans-serif;
+     margin-left: 10px;
      line-height:0.2em;
      font-weight: bold;
      font-family: Baloo Thambi;
@@ -12,6 +19,7 @@
 
    h2 {
      font: 15px sans-serif;
+     margin-left: 10px;
      line-height:0.2em;
      font-weight: bold;
      font-family: Baloo Thambi;
@@ -21,10 +29,6 @@
      fill: #8FA2AC;
      font-family: Baloo Thambi;
      font-size: 12px;
-   }
-
-   .chart {
-     font-family: Baloo Thambi;
    }
 </style>
 
@@ -49,12 +53,13 @@
   var vis_width = 1366;
   var vis_height = 650;
   var params = {};
-
+  
   draw = function(data, vis_width, vis_height, params) {
 
-      var margin = {top: 30, right: 30, bottom: 30, left: 30};
+      var margin = {top: 30, right: 50, bottom: 30, left: 50};
       var width = vis_width - margin.left - margin.right,
           height = vis_height - margin.top - margin.bottom;
+      
       d3.select('.chart-outer')
           .attr('width', vis_width)
           .attr('height', vis_height);
@@ -64,12 +69,10 @@
             .attr('height', vis_width)
           .append('g')
             .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-      document.getElementById('vis').setAttribute('style','height:'+vis_height+'px');
   }
-
+  
   draw(data,vis_width,vis_height,params);
-
+  
 </script>
 </body>
 </html>

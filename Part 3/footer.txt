@@ -3,15 +3,11 @@
 <style>
   @import url('https://fonts.googleapis.com/css?family=Baloo+Thambi');
 
-  input {
-     margin-left: 5px;
-     margin-right: 5px;
-   }
-
    .form-group {
      display: inline-block;
      margin-right: 10px;
    }
+   
    .form-control {
      display: inline-block;
      margin-left: 10px;

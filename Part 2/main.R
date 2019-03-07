@@ -1,23 +1,21 @@
-library(dplyr)
 library(readr)
 library(jsonlite)
+library(dplyr)
+library(lubridate)
 
-url <- "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-01-08/IMDb_Economist_tv_ratings.csv"
+df <-read.csv('../Data/movie_franchises.csv')
 
-df <-read.csv(url(url))
-to_highlight <- c("Law & Order",
-                  "Breaking Bad",
-                  "Game of Thrones",
-                  "Lost",
-                  "The Wire",
-                  "Riverdale",
-                  "The Walking Dead")
+to_highlight <- c("King Kong",
+                  "Terminator",
+                  "Mission: Impossible",
+                  "Teenage Mutant Ninja Turtles")
 
 df <- df %>%
-  mutate(highlight = ifelse(title %in% to_highlight, 1, 0))
+  mutate(highlight = ifelse(franchise %in% to_highlight, 1, 0))
 
 df <- df %>%
-  arrange(title, date)
+  mutate(date = mdy(date) - years(100 * (mdy(date) > mdy('3/1/2019')))) %>%
+  arrange(highlight, franchise, date)
 
 df_json <- jsonlite::toJSON(df)
 
@@ -31,7 +29,7 @@ script <- paste0(header,
 fileConn <- file('index.html')
 writeLines(script, fileConn)
 close(fileConn)
-viewer('index.html')
+rstudioapi::viewer('index.html')
 
 # To show in Viewer Pane
 tempDir <- tempfile() # --> this is key!

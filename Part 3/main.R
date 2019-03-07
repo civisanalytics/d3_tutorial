@@ -3,7 +3,7 @@ library(jsonlite)
 library(dplyr)
 library(lubridate)
 
-df <-read.csv('movies_parsed.csv')
+df <-read.csv('../Data/movie_franchises.csv')
 
 to_highlight <- c("King Kong",
                   "Terminator",
@@ -19,8 +19,8 @@ df <- df %>%
 
 df_json <- jsonlite::toJSON(df)
 
-header <- read_file("header_test.txt")
-footer <- read_file("footer_test.txt")
+header <- read_file("header.txt")
+footer <- read_file("footer.txt")
 script <- paste0(header,
                  df_json,
                  footer)
