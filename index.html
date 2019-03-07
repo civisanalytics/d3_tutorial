@@ -344,7 +344,13 @@
             }) // #005b96 for highlighted, #b3cde0 for non-highlighted
             .style('stroke-width', 0)
             .style('stroke', 'black')
-            .style('opacity', 0.7)
+            .style('opacity', function(d) {
+              if (params['franchiseaxis'] === 'All') {
+                  return 0.7;
+              } else {
+                  return d['franchise'] == params['franchiseaxis'] ? 1 : 0.7;
+              };
+            })
             .on('mouseover', function(d) {
               if (params['franchiseaxis'] === 'All') {
                   d3.selectAll('.dot')
@@ -402,12 +408,23 @@
 
               return hideDetails();})
       };
+      
+      if (params['franchiseaxis'] !== 'All'){
+        var this_index = franchises.indexOf(params['franchiseaxis'])
+
+        d3.selectAll('.line_' + this_index)
+          .style('opacity', 1)
+          .moveToFront(); //bring to front
+        d3.selectAll('.circle_' + this_index)
+          .style('opacity', 1)
+          .moveToFront(); //bring to front
+      }
 
       var show_labels = [{franchise: 'King Kong', date: '1955-01-01', rating: 50},
                          {franchise: 'Terminator', date: '1993-01-01', rating: 85},
                          {franchise: 'TMNT', date: '2004-01-01', rating: 28},
                          {franchise: 'Mission: Impossible', date: '2013-01-01', rating: 97}];
-      debugger;
+
       svg.selectAll('.show_label')
           .data(show_labels)
         .enter().append('text')
